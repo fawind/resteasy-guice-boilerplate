@@ -1,4 +1,3 @@
-import com.google.common.io.Resources;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -7,29 +6,27 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URL;
-
-import static java.lang.String.format;
-
 public class JettyRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(JettyRunner.class);
 
+    private final static String WEB_XML = "src/main/webapp/WEB-INF/web.xml";
+    private final static String RESOURCE_BASE = "src/main/webapp";
+    private final static Integer DEFAULT_PORT = 8080;
+
     public static void main(String[] args) throws Exception {
-        final int port = 8080;
+        int port = Integer.valueOf(System.getProperty("port", DEFAULT_PORT.toString()));
         Server server = new Server(port);
         WebAppContext context = new WebAppContext();
-        URL webxml = Resources.getResource("WEB-INF/web.xml");
-        URL resourceBase = Resources.getResource("webapp");
 
-        context.setDescriptor(webxml.toString());
-        context.setResourceBase(resourceBase.toString());
+        context.setDescriptor(WEB_XML);
+        context.setResourceBase(RESOURCE_BASE);
         context.setContextPath("/");
         context.setParentLoaderPriority(true);
         context.setLogUrlOnStart(true);
 
         ResourceHandler resourceHandler = new ResourceHandler();
-        resourceHandler.setResourceBase(resourceBase.toString());
+        resourceHandler.setResourceBase(RESOURCE_BASE);
         resourceHandler.setWelcomeFiles(new String[]{ "index.html" });
         resourceHandler.setDirectoriesListed(true);
 
@@ -38,7 +35,7 @@ public class JettyRunner {
         server.setHandler(handlers);
 
         server.start();
-        logger.info(format("Server started on port: %d", port));
+        logger.info("Server started on: http://localhost:{}", port);
         server.join();
     }
 }
